@@ -2,6 +2,7 @@ package main
 
 import (
 	// "database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,7 +13,22 @@ import (
 	// _ "github.com/lib/pq"
 )
 
+type Pair struct {
+	DeviceID int `json:"DeviceID"`
+	UserID   int `json:"UserID"`
+}
+
 func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
+	var p Pair
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
+	defer r.Body.Close()
+	fmt.Printf("pair : %#v\n", p)
+
 	w.Write([]byte(`{"status":"active"}`))
 }
 
