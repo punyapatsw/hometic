@@ -21,6 +21,7 @@ func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	var p Pair
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
+		fmt.Printf(err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err.Error())
 		return
