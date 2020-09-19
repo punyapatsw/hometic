@@ -44,12 +44,13 @@ type Device interface {
 	Pair(p Pair) error
 }
 
-// type createPairDeviceFunc = func(p Pair) error
+type CreatePairDeviceFunc func(p Pair) error
 
-type createPairDevice struct {
+func (fn CreatePairDeviceFunc) Pair(p Pair) error {
+	return fn(p)
 }
 
-func (createPairDevice) Pair(p Pair) error {
+func createPairDevice(p Pair) error {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +66,7 @@ func (createPairDevice) Pair(p Pair) error {
 func main() {
 	fmt.Println("hello hometic")
 	r := mux.NewRouter()
-	r.Handle("/pair-device", PairDeviceHandler(createPairDevice{})).Methods(http.MethodPost)
+	r.Handle("/pair-device", PairDeviceHandler(CreatePairDeviceFunc(createPairDevice))).Methods(http.MethodPost)
 
 	// addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
 	addr := fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT"))
