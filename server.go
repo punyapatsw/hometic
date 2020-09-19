@@ -17,32 +17,30 @@ type Pair struct {
 	UserID   int `json:"UserID"`
 }
 
-type PairDeviceHandler struct {
-	createPairDevice CreatePairDevice
+func PairDeviceHandler(createPairDevice createPairDeviceFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var p Pair
+		err := json.NewDecoder(r.Body).Decode(&p)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(err.Error())
+			return
+		}
+		defer r.Body.Close()
+		fmt.Printf("pair: %#v\n", p)
+
+		err = createPairDevice(p)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(err.Error())
+			return
+		}
+
+		w.Write([]byte(`{"status":"active"}`))
+	}
 }
 
-func (ph *PairDeviceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var p Pair
-	err := json.NewDecoder(r.Body).Decode(&p)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(err.Error())
-		return
-	}
-	defer r.Body.Close()
-	fmt.Printf("pair: %#v\n", p)
-
-	err = ph.createPairDevice(p)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(err.Error())
-		return
-	}
-
-	w.Write([]byte(`{"status":"active"}`))
-}
-
-type CreatePairDevice = func(p Pair) error
+type createPairDeviceFunc = func(p Pair) error
 
 func createPairDevice(p Pair) error {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
@@ -60,7 +58,7 @@ func createPairDevice(p Pair) error {
 func main() {
 	fmt.Println("hello hometic")
 	r := mux.NewRouter()
-	r.Handle("/pair-device", &PairDeviceHandler{createPairDevice: createPairDevice}).Methods(http.MethodPost)
+	r.Handle("/pair-device", PairDeviceHandler(createPairDevice)).Methods(http.MethodPost)
 
 	// addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
 	addr := fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT"))
