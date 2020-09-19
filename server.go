@@ -2,11 +2,11 @@ package main
 
 import (
 	// "database/sql"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-
 	"os"
 
 	"github.com/gorilla/mux"
@@ -28,6 +28,22 @@ func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	fmt.Printf("pair : %#v\n", p)
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal("connect to database error", err)
+	}
+	defer db.Close()
+	stmt, err := db.Prepare(`INSERT INTO pairs (deviceid, userid)
+							values ($1, $2)`)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	if _, err = stmt.Exec(p.DeviceID, p.UserID); err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Println("insert table success.")
 
 	w.Write([]byte(`{"status":"active"}`))
 }
