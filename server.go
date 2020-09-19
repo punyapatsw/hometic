@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "database/sql"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -10,7 +9,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	// _ "github.com/lib/pq"
+	_ "github.com/lib/pq"
 )
 
 type Pair struct {
@@ -33,7 +32,7 @@ func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("connect to database error", err)
 	}
 	defer db.Close()
-	stmt, err := db.Prepare(`INSERT INTO pairs (deviceid, userid)
+	stmt, err := db.Prepare(`INSERT INTO pairs (device_id, user_id)
 							values ($1, $2)`)
 	if err != nil {
 		log.Fatal(err)
@@ -54,6 +53,7 @@ func main() {
 	r.HandleFunc("/pair-device", PairDeviceHandler).Methods(http.MethodPost)
 
 	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
+	// addr := fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT"))
 	fmt.Println("addr :", addr)
 
 	server := http.Server{
