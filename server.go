@@ -68,8 +68,8 @@ func main() {
 	r := mux.NewRouter()
 	r.Handle("/pair-device", PairDeviceHandler(CreatePairDeviceFunc(createPairDevice))).Methods(http.MethodPost)
 
-	// addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
-	addr := fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT"))
+	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
+	// addr := fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT"))
 	fmt.Println("addr :", addr)
 
 	server := http.Server{
