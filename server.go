@@ -21,32 +21,26 @@ func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	var p Pair
 	err := json.NewDecoder(r.Body).Decode(&p)
 	if err != nil {
-		fmt.Printf(err)
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
 	defer r.Body.Close()
-	fmt.Printf("pair : %#v\n", p)
+	fmt.Printf("pair: %#v\n", p)
+
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatal("connect to database error", err)
+		log.Fatal(err)
 	}
-	defer db.Close()
-	stmt, err := db.Prepare(`INSERT INTO pairs (device_id, user_id)
-							values ($1, $2)`)
+
+	_, err = db.Exec("INSERT INTO pairs VALUES ($1,$2);", p.DeviceID, p.UserID)
 	if err != nil {
-		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err.Error())
 		return
 	}
-	if _, err = stmt.Exec(p.DeviceID, p.UserID); err != nil {
-		log.Fatal(err)
-		return
-	}
-	fmt.Println("insert table success.")
 
 	w.Write([]byte(`{"status":"active"}`))
-}
 
 func main() {
 	fmt.Println("hello hometic")
