@@ -41,6 +41,7 @@ func PairDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte(`{"status":"active"}`))
+}
 
 func main() {
 	fmt.Println("hello hometic")
