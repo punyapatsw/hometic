@@ -1,4 +1,6 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/anuchito/hometic v0.0.0-20200918153409-106754fe0ef9 h1:1hSD3v0kVfJ3M4vNvJSuW7O4T1N1WwGRm4BdQER9cis=
+github.com/anuchito/hometic v0.0.0-20200918153409-106754fe0ef9/go.mod h1:qDTN7ICPzapTG6utvHJaJJNn4XOgO4OEw4+sgbAoKNo=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=

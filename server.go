@@ -19,8 +19,28 @@ type Pair struct {
 	UserID   int `json:"UserID"`
 }
 
-func PairDeviceHandler(device Device) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+type CustomResponseWriter interface {
+	JSON(statusCode int, data interface{})
+}
+
+type JSONResponseWriter struct {
+	http.ResponseWriter
+}
+
+type CustomHandlerFunc func(w CustomResponseWriter, r *http.Request)
+
+func (handler CustomHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	handler(&JSONResponseWriter{w}, r)
+}
+
+func (w *JSONResponseWriter) JSON(statusCode int, data interface{}) {
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(data)
+}
+
+func PairDeviceHandler(device Device) CustomHandlerFunc {
+	return func(w CustomResponseWriter, r *http.Request) {
 		// i := r.Context().Value("logger")
 		logger.L(r.Context()).Info("pair-device")
 		// log := i.(*zap.Logger)
@@ -28,8 +48,7 @@ func PairDeviceHandler(device Device) http.HandlerFunc {
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(err.Error())
+			w.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
 		defer r.Body.Close()
@@ -37,12 +56,13 @@ func PairDeviceHandler(device Device) http.HandlerFunc {
 
 		err = device.Pair(p)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(err.Error())
+			w.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		w.Write([]byte(`{"status":"active"}`))
+		// w.JSON(http.StatusOK, []byte(`{"status":"active"}`))
+		w.JSON(http.StatusOK, map[string]interface{}{"status": "active"})
+
 	}
 }
 
