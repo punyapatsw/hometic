@@ -83,11 +83,11 @@ func NewCreatePairDevice(db *sql.DB) CreatePairDeviceFunc {
 	}
 }
 
-func main() {
+func run() error {
 	fmt.Println("hello hometic")
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	r := mux.NewRouter()
@@ -95,7 +95,6 @@ func main() {
 	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
-	// addr := fmt.Sprintf("127.0.0.1:%s", os.Getenv("PORT"))
 	fmt.Println("addr :", addr)
 
 	server := http.Server{
@@ -103,5 +102,12 @@ func main() {
 		Handler: r,
 	}
 	log.Println("starting")
-	log.Fatal(server.ListenAndServe())
+	return server.ListenAndServe()
+}
+
+func main() {
+	if err := run(); err != nil {
+		log.Fatal("can't start application", err)
+	}
+
 }
