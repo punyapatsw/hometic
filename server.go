@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 type Pair struct {
@@ -19,6 +20,10 @@ type Pair struct {
 
 func PairDeviceHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		l := zap.NewExample()
+		l = l.With(zap.Namespace("hometic"), zap.String("error", "error"))
+		l.Info("pair-device")
+
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
