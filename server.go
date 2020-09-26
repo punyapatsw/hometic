@@ -8,9 +8,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/punyapatsw/hometic/logger"
+
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
-	"go.uber.org/zap"
 )
 
 type Pair struct {
@@ -20,10 +21,10 @@ type Pair struct {
 
 func PairDeviceHandler(device Device) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		l := zap.NewExample()
-		l = l.With(zap.Namespace("hometic"), zap.String("error", "error"))
-		l.Info("pair-device")
-
+		// i := r.Context().Value("logger")
+		logger.L(r.Context()).Info("pair-device")
+		// log := i.(*zap.Logger)
+		// log.Info("pair-device")
 		var p Pair
 		err := json.NewDecoder(r.Body).Decode(&p)
 		if err != nil {
@@ -70,6 +71,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+	r.Use(logger.Middleware)
 	r.Handle("/pair-device", PairDeviceHandler(NewCreatePairDevice(db))).Methods(http.MethodPost)
 
 	addr := fmt.Sprintf("0.0.0.0:%s", os.Getenv("PORT"))
